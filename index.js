@@ -3,7 +3,7 @@ const app = express()
 const morgan = require('morgan')
 const path = require("path")
 const favicon = require('serve-favicon');
-const wls = require("steem");
+const wls = require("wlsjs");
 const moment = require('moment');
 var current=0
 
@@ -137,22 +137,21 @@ app.get('/:id',(req,res)=>{
     if(user!="/@"){
         user.toLowerCase();
         cargarhistorial(user.substr(2,user.length),(page ? page*100 : 100),(data,err,datau)=>{
-            if(manejoerrores) res.redirect('/err')
-            else
                 confis((gsp)=>{
-                if(manejoerrores){
-                    res.redirect('/err')
-                }
                 if(gsp){
                     res.status(200).render('usernames',{
-                        datos:data,
-                        fech:fech,
-                        u:user.substr(2,user.length),
-                        datau:datau,
-                        sp:gsp,
-                        page:page
+                            datos:data,
+                            fech:fech,
+                            u:user.substr(2,user.length),
+                            datau:datau,
+                            sp:gsp,
+                            page:page
                     })
                 }
+                else if(manejoerrores){
+                    res.redirect('/err')
+                }
+                
             })
         })
     }else{
@@ -177,13 +176,13 @@ app.get('/trx/:id',(req,res)=>{
     console.log(req.path)
     var trxid=path.basename(req.path)
     buscarinfo(trxid,(datossend)=>{
-        if(manejoerrores){
-            res.redirect('/err')
-        }
-        else{
+        if(datossend){
             res.status(200).render('trx',{
                 data:datossend
             })
+        }
+        else if(manejoerrores){
+            res.redirect('/err')
         }
     })
 })
