@@ -1,12 +1,23 @@
-//dependencias
 const express = require("express")
 const app = express()
 const morgan = require('morgan')
 const path = require("path")
 const favicon = require('serve-favicon');
-const nocache = require('nocache')
 const wls = require("wlsjs");
-wls.api.setOptions({ url: 'wss://rpc.smoke.io' });
+const moment = require('moment');
+var current=0
+
+nodo()
+setInterval(()=>{ nodo() },10*60*1000)
+function nodo(){
+    const noneCurrent=[
+        'https://rpc.smoke.io'
+    ]
+    wls.api.setOptions({ url: noneCurrent[current] });
+    console.log(`current node ${noneCurrent[current]}`)
+    current>=noneCurrent.length-1 ? current=0 : current++
+    console.log(`next node ${noneCurrent[current]}`)
+}
 
 
 app.set('view engine', 'ejs');
@@ -34,37 +45,72 @@ app.get('/',(req,res)=>{
 var data=[]
 var datosU=[]
 var manejoerrores=false
+var fech=[]
 function cargarhistorial(usuario,start,callback){
     wls.api.getAccounts([usuario], (err, response)=>{
         if(err){
+            nodo()
             manejoerrores=true
             if(callback)
                 callback(err)
         }
-        if(response)
+        if(response){
             datosU.push(response[0])
-    })
-    wls.api.getAccountHistory(usuario, start , 100, function(err, result) {
+            dataUser(usuario,start,(data,data1,datosU)=>{
+                if(callback)
+                    callback(data,(data1 ? data1 : null),datosU)
+            })
+        }
+
+    })   
+}
+function dataUser(usuario,start,callback){
+    wls.api.getAccountHistory(usuario, start*-1 , Math.min(start,1000), function(err, result) {
         if(err){
+            nodo()
             manejoerrores=true
             if(callback)
-                callback(err)
+                callback(null,err,null)
         }
-        if(result){
+        else if(result && result.length>0){
+            console.log("esta aqui")
             result.reverse();
-            for(var i = 0; i < result.length; i++) {
-                data.push(result[i]);
+            console.log(result.length)
+            console.log(start*-1)
+            console.log(Math.min(start,1000))
+            console.log(start.toString().length)
+            var numero=start<=1000 ? 100 : start<=100000 ? 1000 : start<=1000000 ? 10000 : start<=10000000 ? 100000 : null
+            var n=start/numero
+            var putno=n.toString().indexOf(".");
+            var numeroN=n.toString()
+            var numeroS=numeroN.substring((putno!=-1 ? putno+1 : 0),numero.length)
+            console.log(n)
+            console.log(putno)
+            console.log(Number(numeroS)*100-100)
+            console.log(Number(numeroS)*100)
+            for(var i = (Number(numeroS)*100-100);i<(result.length< (Number(numeroS)*100) ? result.length : Number(numeroS)*100); i++) {
+                //if(result[i][0]>=1){
+                    data.push(result[i])
+                    var fpreviud=moment.utc(result[i][1].timestamp).valueOf()
+                    fech.push(moment(fpreviud).fromNow())
+                //}
             }
-            if(callback)
+            if (callback){
+                console.log("generando callback")
                 callback(data,null,datosU)
+            }     
         }else{
-            callback(null,err,null)
+            if (callback){
+                callback(null,true,null)
+            }  
         }
+
     });
 }
 function confis(callback){
     wls.api.getDynamicGlobalProperties((err, result) => {
         if(err){
+            nodo()
             manejoerrores=true
             if(callback)
                 callback(err)
@@ -79,30 +125,35 @@ function confis(callback){
         }
     });
 }
+
+
 app.get('/:id',(req,res)=>{
     sp=null
     data=[]
     user=null
     datosU=[]
+    fech=[]
     var user=req.path,
         page=req.query.page
     if(user!="/@"){
         user.toLowerCase();
-        cargarhistorial(user.substr(2,user.length),(page ? (page*-100) : -100),(data,err,datau)=>{
+        cargarhistorial(user.substr(2,user.length),(page ? page*100 : 100),(data,err,datau)=>{
             if(err)
                 res.render("errores")
             else{
                 confis((gsp)=>{
                     if(manejoerrores){
-                        res.status(200).render("errores")
+                        res.status(500).render("errores")
                     }
                     if(gsp){
                         res.status(200).render('usernames',{
                             datos:data,
+                            fech:fech,
                             u:user.substr(2,user.length),
                             datau:datau,
-                            page:page,
-                            sp:gsp
+                            sp:gsp,
+                            pageLast:(page ? (data[0][0]/100)+(page*100) : data[0][0]/100),
+                            page:page
                         })
                     }
                 })
@@ -115,6 +166,7 @@ app.get('/:id',(req,res)=>{
 function buscarinfo(trxid,callback){
     wls.api.getTransaction(trxid, function(err, result) {
         if(err){
+            nodo()
             manejoerrores=true
             if(callback)
                 callback(err)
@@ -130,14 +182,12 @@ app.get('/trx/:id',(req,res)=>{
     var trxid=path.basename(req.path)
     buscarinfo(trxid,(datossend)=>{
         if(manejoerrores){
-            res.status(200).render("errores")
+            res.status(500).render("errores")
         }
         //res.send(datossend)
-        else{
-            res.status(200).render('trx',{
-                data:datossend
-            })
-        }
+        res.status(200).render('trx',{
+            data:datossend
+        })
     })
 })
 

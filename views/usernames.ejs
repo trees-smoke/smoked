@@ -256,8 +256,8 @@
             </div>
             </div>
             <div class="col-lg-8 col-sm-12">
-                <% datos.forEach((user)=>{ %>
-
+                <% datos.forEach((user,key)=>{ %>
+                    <% var fechTimeCurrente=fech[key] %>
                     <% if(user[1].op[0]=='vote'){ %>
                         <div class="alert alert-success" role="alert">
                                 
@@ -273,10 +273,10 @@
                                 <%= `${user[1].op[1].voter}` %>
                             <% } %>
                             
-                            <b> smoked </b> 
+                            <b>reward</b> 
                             
-                            <a href=<%=`https://smoke.io/@${user[1].op[1].author}/${user[1].op[1].permlink}` %> />@<%= user[1].op[1].author %>/<%= `${user[1].op[1].permlink}`.substring(0,25) %>...</a>
-                            (<%= (user[1].op[1].weight)/100 %>%)
+                            <a href=<%=`https://whaleshares.io/@${user[1].op[1].author}/${user[1].op[1].permlink}` %> />@<%= user[1].op[1].author %>/<%= `${user[1].op[1].permlink}`.substring(0,25) %>...</a>
+                            (<%= (user[1].op[1].weight)/100 %>%) - <%= `(${fechTimeCurrente})` %>
 
                         </div>
                     <% } %>
@@ -290,7 +290,61 @@
                             <% } %>
                             <%= `${user[1].op[1].creator} ` %>
                             <b>Create Account</b>
-                            <%= ` ${user[1].op[1].new_account_name}` %> 
+                            <%= ` ${user[1].op[1].new_account_name}` %> - <%= `(${fechTimeCurrente})` %>
+                        </div>
+                    <% } %>
+
+
+                    <% if(user[1].op[0]=='account_update' ){ %>
+                        <div class="alert alert-success" role="alert">
+                            <% if(user[1].trx_id=='0000000000000000000000000000000000000000'){ %>
+                                <a class="trxtag" ><%= `virtual` %></a>
+                            <% }else{ %>
+                                <a class="trxtag" href=<%= `/trx/${user[1].trx_id}` %> ><%= user[1].trx_id.substring(0,8) %></a>
+                            <% } %>
+                            <%= `${user[1].op[1].account} ` %>
+                            <b>account update</b><br>
+                            <a class="text-danger"><%= ` ${user[1].op[1].json_metadata}` %> </a> - <%= `(${fechTimeCurrente})` %>
+                        </div>
+                    <% } %>
+
+                    <% if(user[1].op[0]=='witness_update' ){ %>
+                        <div class="alert alert-success" role="alert">
+                            <% if(user[1].trx_id=='0000000000000000000000000000000000000000'){ %>
+                                <a class="trxtag" ><%= `virtual` %></a>
+                            <% }else{ %>
+                                <a class="trxtag" href=<%= `/trx/${user[1].trx_id}` %> ><%= user[1].trx_id.substring(0,8) %></a>
+                            <% } %>
+                            <%= `${user[1].op[1].owner} ` %> - <%= `(${fechTimeCurrente})` %>
+                            <b>witness update</b><br>
+                            <ul>
+                                <li>url:<%= ` ${user[1].op[1].url}` %></li>
+                                <li>block:signing key:<%= ` ${user[1].op[1].block_signing_key}` %></li>
+                                <li>props:
+                                    <a class="text-danger">fee:<%= ` ${user[1].op[1].props.fee}` %></a>
+                                    <a class="text-danger">account creation fee:<%= ` ${user[1].op[1].props.account_creation_fee}` %></a>
+                                    <a class="text-danger">maximum block size:<%= ` ${user[1].op[1].props.maximum_block_size}` %></a>
+                                </li>
+                            </ul>
+                        </div>
+                    <% } %>
+
+                    <% if(user[1].op[0]=='account_witness_vote' ){ %>
+                        <div class="alert alert-success" role="alert">
+                            <% if(user[1].trx_id=='0000000000000000000000000000000000000000'){ %>
+                                <a class="trxtag" ><%= `virtual` %></a>
+                            <% }else{ %>
+                                <a class="trxtag" href=<%= `/trx/${user[1].trx_id}` %> ><%= user[1].trx_id.substring(0,8) %></a>
+                            <% } %>
+                            <%= `${user[1].op[1].account} ` %>
+                            <b>
+                                <% if(user[1].op[1].approve==true){ %>
+                                    vote witness
+                                <% }else{ %>
+                                    unvoted witness
+                                <% } %>
+                            </b>
+                            <%= ` ${user[1].op[1].witness}` %> - <%= `(${fechTimeCurrente})` %>
                         </div>
                     <% } %>
 
@@ -305,7 +359,7 @@
                             <b>claim reward balance</b>
                             <%= user[1].op[1].reward_vests %>
                             <% if(user[1].op[1].reward_vests && user[1].op[1].reward_vests){ %> <%= ' and ' %> <% } %>
-                            <%= user[1].op[1].reward_vests %>
+                            <%= user[1].op[1].reward_vests %> - <%= `(${fechTimeCurrente})` %>
                         </div>
                     <% } %>
                     
@@ -324,18 +378,18 @@
                                     <%= `${user[1].op[1].author} ` %>
                                 <% } %>
 
-                                <b>replied to</b> 
+                                <b>replied to</b>
 
                                 <% if(user[1].op[1].parent_author!=u) {%>
-                                    <a href=<%= `@${user[1].op[1].parent_author}` %> ><%= `${user[1].op[1].parent_author} ` %></a>
+                                    <a href=<%= `@${user[1].op[1].parent_author}` %> ><%= `${user[1].op[1].parent_author} ` %></a> - <%= `(${fechTimeCurrente})` %>
                                 <% }else{ %>
-                                    <%= `${user[1].op[1].parent_author} ` %>
+                                    <%= `${user[1].op[1].parent_author} ` %> - <%= `(${fechTimeCurrente})` %>
                                 <% } %>
                                 
                                 <br>
-                                <a href=<%= `https://smoke.io/@${user[1].op[1].author}/${user[1].op[1].permlink}` %> ><%= `${user[1].op[1].permlink}` %></a>
+                                <a href=<%= `https://whaleshares.io/@${user[1].op[1].author}/${user[1].op[1].permlink}` %> ><%= `${user[1].op[1].permlink}` %></a>
                             <% }else{ %>
-                                <%= `${user[1].op[1].author} ` %> <b>authored a post: </b>  <%= `${user[1].op[1].permlink.substring(0,25)}...` %>
+                                <%= `${user[1].op[1].author} ` %> <b>authored a post: </b>  <%= `${user[1].op[1].permlink.substring(0,25)}...` %> - <%= `(${fechTimeCurrente})` %>
                             <% } %> 
                         </div>
                     <% } %>
@@ -343,14 +397,49 @@
 
                     <% if(user[1].op[0]=='producer_reward'){ %>
                         <div class="alert alert-success" role="alert">
+                                <a class="trxtag" ><%= `virtual` %></a>
+                            <%= `${user[1].op[1].producer} ` %> <b>produced</b><%= ` ${user[1].op[1].vesting_shares}` %> - <%= `(${fechTimeCurrente})` %>
+                        </div>
+                    <% } %>
+
+                    <% if(user[1].op[0]=='withdraw_vesting'){ %>
+                        <div class="alert alert-success" role="alert">
                             <% if(user[1].trx_id=='0000000000000000000000000000000000000000'){ %>
                                 <a class="trxtag" ><%= `virtual` %></a>
                             <% }else{ %>
                                 <a class="trxtag" href=<%= `/trx/${user[1].trx_id}` %> ><%= user[1].trx_id.substring(0,8) %></a>
                             <% } %>
-                            <%= `${user[1].op[1].producer} ` %> <b>produced</b><%= ` ${user[1].op[1].vesting_shares}` %>
+                            <%= `${user[1].op[1].account} ` %> <b>Power down</b><%= ` ${user[1].op[1].vesting_shares}` %> - <%= `(${fechTimeCurrente})` %>
                         </div>
                     <% } %>
+
+                    <% if(user[1].op[0]=='transfer'){ %>
+                        <div class="alert alert-success" role="alert">
+                            <% if(user[1].trx_id=='0000000000000000000000000000000000000000'){ %>
+                                <a class="trxtag" ><%= `virtual` %></a>
+                            <% }else{ %>
+                                <a class="trxtag" href=<%= `/trx/${user[1].trx_id}` %> ><%= user[1].trx_id.substring(0,8) %></a>
+                            <% } %>
+                            <%= `${user[1].op[1].from} ` %> <b>transfer</b><%= ` ${user[1].op[1].amount}` %> <b>to</b><%= ` ${user[1].op[1].to}` %><br>
+                            memo:<%= `${user[1].op[1].memo} ` %> - <%= `(${fechTimeCurrente})` %>
+                        </div>
+                    <% } %>
+
+
+                    <% if(user[1].op[0]=='transfer_to_vesting'){ %>
+                        <div class="alert alert-success" role="alert">
+                            <% if(user[1].trx_id=='0000000000000000000000000000000000000000'){ %>
+                                <a class="trxtag" ><%= `virtual` %></a>
+                            <% }else{ %>
+                                <a class="trxtag" href=<%= `/trx/${user[1].trx_id}` %> ><%= user[1].trx_id.substring(0,8) %></a>
+                            <% } %>
+                            <%= `${user[1].op[1].from} ` %> <b>transfer to vesting</b> <%= ` ${user[1].op[1].to}` %></b>
+                            amount:<%= `${user[1].op[1].amount} ` %> - <%= `(${fechTimeCurrente})` %>
+
+
+                        </div>
+                    <% } %>
+
 
                     <% if(user[1].op[0]=='custom_json'){ %>
                         <% if(user[1].op[1].json){ %>
@@ -368,17 +457,36 @@
                                             <%= `${dtyu[1].account} ` %>
                                         <% } %>
 
-                                        <b> resmoked </b>
+                                        <b> shared </b>
 
                                         <% if(dtyu[1].author!=u) {%>
-                                            <a href=<%= `@${dtyu[1].author}` %> ><%= `${dtyu[1].author} ` %></a>
+                                            <a href=<%= `@${dtyu[1].author}` %> ><%= `${dtyu[1].author} ` %></a> 
                                         <% }else{ %>
                                             <%= `${dtyu[1].author} ` %>
                                         <% } %>
 
                                     
                                     </br>
-                                        <a href=<%= `https://smoke.io/@${dtyu[1].author}/${dtyu[1].permlink}` %> ><%= dtyu[1].permlink %></a>
+                                        <a href=<%= `https://whaleshares.io/@${dtyu[1].author}/${dtyu[1].permlink}` %> ><%= dtyu[1].permlink %></a> - <%= `(${fechTimeCurrente})` %>
+                                    </div>
+                                <% } %>
+
+                                <% if(dtyu[0]=='follow'){ %>
+                                    <div class="alert alert-success" role="alert">
+                                        <% if(user[1].trx_id=='0000000000000000000000000000000000000000'){ %>
+                                            <a class="trxtag" ><%= `virtual` %></a>
+                                        <% }else{ %>
+                                            <a class="trxtag" href=<%= `/trx/${user[1].trx_id}` %> ><%= user[1].trx_id.substring(0,8) %></a>
+                                        <% } %>
+                                        <%= `${dtyu[1].follower} ` %> 
+                                            <b>
+                                                <% if(dtyu[1].what[0]=='blog'){ %>
+                                                    follow
+                                                <% }else{ %>
+                                                    unfollow
+                                                <% } %>
+                                            </b>
+                                        <%= ` ${dtyu[1].following}` %>- <%= `(${fechTimeCurrente})` %>
                                     </div>
                                 <% } %>
                         <% } %>
@@ -398,11 +506,12 @@
                                     <%= `${user[1].op[1].author}` %>
                                 <% } %>
                             <b>author reward</b><%= `${user[1].op[1].steem_payout}, ${user[1].op[1].vesting_payout} of ` %><br>
-                            <a href=<%= `https://smoke.io/@${user[1].op[1].author}/${user[1].op[1].permlink}` %> ><%= user[1].op[1].permlink %></a>
+                            <a href=<%= `https://whaleshares.io/@${user[1].op[1].author}/${user[1].op[1].permlink}` %> ><%= user[1].op[1].permlink %></a> - <%= `(${fechTimeCurrente})` %>
                         </div>
                     <% } %>
         
                 <% }); %>
+                
                 <center>
                     <nav aria-label="...">
                             <ul class="pagination">
@@ -418,6 +527,9 @@
                             <li class="page-item"><a class="page-link" href=<%= `/@${u}?page=${page ? parseInt(page)+1 : 2}` %>><%= `${page ? parseInt(page)+1 : 2}` %></a></li>
                             <li class="page-item">
                                 <a class="page-link" href=<%= `/@${u}?page=${page ? parseInt(page)+1 : 2}` %>>Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href=<%= `/@${u}?page=${Math.ceil(pageLast)}` %>>Last Page</a>
                             </li>
                         </ul>
                     </nav>
